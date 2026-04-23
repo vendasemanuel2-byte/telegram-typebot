@@ -2,7 +2,7 @@ import { Bot, InlineKeyboard } from "grammy";
 import axios from "axios";
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const TYPEBOT_ID = "g38gg26nuhlx7tvydaveudgw";   // Seu ID (publicado)
+const TYPEBOT_ID = "g38gg26nuhlx7tvydaveudgw";
 
 const bot = new Bot(TELEGRAM_TOKEN);
 const sessions = new Map();
@@ -24,9 +24,8 @@ async function handleTypebotMessage(ctx, userMessage) {
 
   try {
     if (!sessionId) {
-      // Endpoint correto para bot publicado
       const startRes = await axios.post(
-        `https://typebot.io/api/v1/typebots/${TYPEBOT_ID}/startChat`,
+        `https://typebot.io/api/v1/typebots/${TYPEBOT_ID}/preview/startChat`,
         { isStreamEnabled: true }
       );
       sessionId = startRes.data.sessionId;
@@ -58,7 +57,7 @@ async function handleTypebotMessage(ctx, userMessage) {
     }
   } catch (error) {
     console.error("Erro:", error.response?.data || error.message);
-    await ctx.reply("❌ Erro ao conectar. Use /reset e tente novamente.");
+    await ctx.reply("❌ Erro ao conectar. Use /reset");
   }
 }
 
@@ -74,4 +73,4 @@ bot.on("callback_query:data", async (ctx) => {
 });
 
 bot.start();
-console.log("🚀 Bot Telegram + Typebot Publicado rodando!");
+console.log("🚀 Bot rodando (Preview mode)");
