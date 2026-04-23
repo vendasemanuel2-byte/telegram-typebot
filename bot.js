@@ -3,6 +3,7 @@ import axios from "axios";
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
 const TYPEBOT_ID = "g38gg26nuhlx7tvydaveudgw";
+const TYPEBOT_API_TOKEN = process.env.TYPEBOT_API_TOKEN;
 
 const bot = new Bot(TELEGRAM_TOKEN);
 const sessions = new Map();
@@ -25,8 +26,9 @@ async function handleTypebotMessage(ctx, userMessage) {
   try {
     if (!sessionId) {
       const startRes = await axios.post(
-        `https://typebot.io/api/v1/typebots/${TYPEBOT_ID}/preview/startChat`,
-        { isStreamEnabled: true }
+        `https://typebot.io/api/v1/typebots/${TYPEBOT_ID}/startChat`,
+        { isStreamEnabled: true },
+        { headers: { Authorization: `Bearer ${TYPEBOT_API_TOKEN}` } }
       );
       sessionId = startRes.data.sessionId;
       sessions.set(chatId, sessionId);
@@ -34,7 +36,8 @@ async function handleTypebotMessage(ctx, userMessage) {
 
     const replyRes = await axios.post(
       `https://typebot.io/api/v1/sessions/${sessionId}`,
-      { message: userMessage }
+      { message: userMessage },
+      { headers: { Authorization: `Bearer ${TYPEBOT_API_TOKEN}` } }
     );
 
     const messages = replyRes.data.messages || [];
@@ -56,7 +59,7 @@ async function handleTypebotMessage(ctx, userMessage) {
       }
     }
   } catch (error) {
-    console.error("Erro:", error.response?.data || error.message);
+    console.error("Erro Typebot:", error.response?.data || error.message);
     await ctx.reply("❌ Erro ao conectar. Use /reset");
   }
 }
@@ -73,4 +76,4 @@ bot.on("callback_query:data", async (ctx) => {
 });
 
 bot.start();
-console.log("🚀 Bot rodando (Preview mode)");
+console.log("🚀 Bot rodando com API Token!");
