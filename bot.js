@@ -2,7 +2,7 @@ import { Bot, InlineKeyboard } from "grammy";
 import axios from "axios";
 
 const TELEGRAM_TOKEN = process.env.TELEGRAM_TOKEN;
-const TYPEBOT_ID = "g38gg26nuhlx7tvydaveudgw";   // Seu ID interno
+const TYPEBOT_PUBLIC_ID = "g38gg26nuhlx7tvydaveudgw";   // ← Mude se for diferente
 
 const bot = new Bot(TELEGRAM_TOKEN);
 const sessions = new Map();
@@ -24,9 +24,8 @@ async function handleTypebotMessage(ctx, userMessage) {
 
   try {
     if (!sessionId) {
-      // Endpoint para bot publicado
       const startRes = await axios.post(
-        `https://typebot.io/api/v1/typebots/${TYPEBOT_ID}/startChat`,
+        `https://typebot.io/api/v1/typebots/${TYPEBOT_PUBLIC_ID}/startChat`,
         { isStreamEnabled: true }
       );
       sessionId = startRes.data.sessionId;
@@ -42,12 +41,12 @@ async function handleTypebotMessage(ctx, userMessage) {
 
     for (const msg of messages) {
       if (msg.type === "text") {
-        await ctx.reply(msg.content?.text || msg.content || "...");
+        await ctx.reply(msg.content?.text || msg.content || "❤️");
       } else if (msg.type === "image" && msg.content?.url) {
         await ctx.replyWithPhoto(msg.content.url);
       } else if (msg.type === "audio" && msg.content?.url) {
         await ctx.replyWithAudio(msg.content.url);
-      } else if (msg.items && msg.items.length > 0) {
+      } else if (msg.items?.length > 0) {
         const keyboard = new InlineKeyboard();
         msg.items.forEach(item => {
           const label = item.content || item;
@@ -57,8 +56,8 @@ async function handleTypebotMessage(ctx, userMessage) {
       }
     }
   } catch (error) {
-    console.error(error.message);
-    await ctx.reply("❌ Erro temporário. Use /reset e tente novamente.");
+    console.error("Erro:", error.response?.data || error.message);
+    await ctx.reply("❌ Erro temporário. Use /reset");
   }
 }
 
@@ -74,3 +73,4 @@ bot.on("callback_query:data", async (ctx) => {
 });
 
 bot.start();
+console.log("🚀 Bot rodando com ID:", TYPEBOT_PUBLIC_ID);
